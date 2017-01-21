@@ -11,6 +11,6 @@ urlpatterns = patterns('qa.views',
     url(r'^question/([^/]+)/', 'test', name='id'),
     url(r'^ask/', test, name='ask'),
     url(r'^popular/', test, name='popular'),
-    url(r'^view/', test, name='view'),   
+    url(r'^new/', test, name='view'),   
     url(r'^$', test, name='all'),
 )
