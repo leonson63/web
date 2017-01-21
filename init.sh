@@ -10,5 +10,5 @@ sudo /etc/init.d/nginx restart
 
 # run gunicorn
 cd ~/web/ask
-gunicorn -с ../gunicorn.conf ask.wsgi:application
+gunicorn -c "../gunicorn.conf" ask.wsgi:application
 
