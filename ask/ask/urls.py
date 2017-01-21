@@ -8,5 +8,5 @@ urlpatterns = patterns('',
     # url(r'^$', 'ask.views.home', name='home'),
     url(r'^admin/', include(admin.site.urls)),
 
-    url(r'^.*', include('qa.urls')),
+    url(r'^', include('qa.urls')),
 )
