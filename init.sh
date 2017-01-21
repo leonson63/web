@@ -9,5 +9,6 @@ sudo ln -s etc/nginx.conf /etc/nginx/conf.d/add.conf
 sudo /etc/init.d/nginx restart
 
 # run gunicorn
-sudo gunicorn -v -с gunicorn.conf web/hello:wsgi
+cd ~/web/ask
+sudo gunicorn -v -с gunicorn.conf ask.wsgi:application
 
