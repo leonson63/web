@@ -10,4 +10,4 @@ sudo /etc/init.d/nginx restart
 
 # run gunicorn
 cd ~/web/ask
-gunicorn -c "../gunicorn.conf" ask.wsgi&
+gunicorn -c "../gunicorn.conf" ask.wsgi --daemon
