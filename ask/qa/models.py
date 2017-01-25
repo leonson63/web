@@ -19,7 +19,7 @@ class Question(models.Model):
     added_at = models.DateTimeField()
     rating = models.IntegerField()
     author = models.OneToOneField(User)
-    likes = models.ManyToMany(User, related_name='question_like')
+    likes = models.ManyToManyField(User, related_name='question_like')
     
 class Answer(models.Model):
     text = models.TextField()
