@@ -1,7 +1,7 @@
 from django.db import models
 
 # Create your models here.
-class QuestionManager(model.Manager)
+class QuestionManager(models.Manager)
     
     # returns last added question
     def new():
