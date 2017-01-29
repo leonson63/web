@@ -5,11 +5,11 @@ from django.contrib.auth.models import User
 class QuestionManager(models.Manager):
     
     # returns last added question
-    def new():
-        pass
+    def new(self):
+        return self.order_by('-pk')
     # returns questions sorted by rating
-    def popular():
-        pass
+    def popular(self):
+        return self.order_by('-rating')
       
 class Question(models.Model):
     objects = QuestionManager()
@@ -25,5 +25,7 @@ class Answer(models.Model):
     text = models.TextField()
     added_at = models.DateTimeField(blank = True, auto_now_add=True)
     question = models.ForeignKey(Question)
-    author = models.OneToOneField(User)
-    
+    author = models.ForeignKey(User)
+
+    def get_by_id(self,id):
+        Answer.obgects.filter(question__pk=id)
