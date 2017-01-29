@@ -7,6 +7,7 @@ sudo ln -sf /home/box/web/etc/nginx.conf /etc/nginx/conf.d/add.conf
 
 # run nginx
 sudo /etc/init.d/nginx restart
+sudo /etc/init.d/mysql restart
 
 # run gunicorn
 cd ~/web/ask
