@@ -40,7 +40,7 @@ def question(request, *args, **kwargs):
         question = Question.objects.get(pk=kwargs['id'])
     except Question.DoesNotExist:
         raise Http404
-    answers=Answer.get_by_id(kwargs['id'])
+    answers=Answer.filter(question__pk=kwargs['id'])
     return render(request, 'question.html', {
         'question': question,
         'answers': answers
