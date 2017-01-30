@@ -11,18 +11,18 @@ def test(request, *args, **kwargs):
     return HttpResponse('OK', status=200)
 
 def all(request):
-    return show(request,Question.objects.new())
+    return show(request,Question.objects.new(),'question-all')
 
 def popular(request):
-    return show(request,Question.objects.popular())
+    return show(request,Question.objects.popular(),'question-id')
 
 
 # new questions view
-def show(request, query):
+def show(request, query, url_name):
     limit = 10 # hadrcoding!!!
     page = request.GET.get('page', 1) #hardcoding !!!
     paginator = Paginator(query, limit)
-    paginator.baseurl = reverse('qa.urls:id')
+    paginator.baseurl = reverse(url_name)
     page = paginator.page(page) # Page
     return render(request, 'all.html', {
         'questions': page.object_list,
