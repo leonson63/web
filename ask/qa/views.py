@@ -22,7 +22,7 @@ def show(request, query):
     limit = 10 # hadrcoding!!!
     page = request.GET.get('page', 1) #hardcoding !!!
     paginator = Paginator(query, limit)
-    paginator.baseurl = reverse('urls:id')
+    paginator.baseurl = reverse('qa.urls:id')
     page = paginator.page(page) # Page
     return render(request, 'all.html', {
         'questions': page.object_list,
