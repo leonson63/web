@@ -19,7 +19,6 @@ def popular(request):
 
 # new questions view
 def show(request, query, url_name):
-    if query.length()
     limit = 10 # hadrcoding!!!
     page = request.GET.get('page', 1) #hardcoding !!!
     paginator = Paginator(query, limit)
@@ -40,7 +39,7 @@ def question(request, *args, **kwargs):
         question = Question.objects.get(pk=kwargs['id'])
     except Question.DoesNotExist:
         raise Http404
-    answers=Answer.filter(question__pk=kwargs['id'])
+    answers=Answer.objects.filter(question__pk=kwargs['id'])
     return render(request, 'question.html', {
         'question': question,
         'answers': answers
