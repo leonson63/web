@@ -11,14 +11,14 @@ def test(request, *args, **kwargs):
     return HttpResponse('OK', status=200)
 
 def all(request):
-    return show(request,Questions.objects.new())
+    return show(request,Question.objects.new())
 
 def popular(request):
-    return show(request,Questions.objects.popular())
+    return show(request,Question.objects.popular())
 
 
 # new questions view
-def show(request,query):
+def show(request, query):
     limit = 10 # hadrcoding!!!
     page = request.GET.get('page', 1) #hardcoding !!!
     paginator = Paginator(query, limit)
@@ -30,12 +30,12 @@ def show(request,query):
         'page': page,
 })
 
-def question(request, id):
+def question(request, *args, **kwargs):
     try:
-        question = Question.objects.get(pk=id)
+        question = Question.objects.get(pk=kwargs['id'])
     except Question.DoesNotExist:
         raise Http404
-    answers=Answer.get_by_id(id)
+    answers=Answer.get_by_id(kwargs['id'])
     return render(request, 'question.html', {
         'question': question,
         'answers': answers
