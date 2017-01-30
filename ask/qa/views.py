@@ -28,7 +28,6 @@ def show(request, query, url_name):
         questions = paginator.page(page)
     except EmptyPage:
         questions = paginator.page(paginator.num_pages)
-    return page
 
 #    questions = paginator.page(page) # Page
     return render(request, 'all.html', {
