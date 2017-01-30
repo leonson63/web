@@ -14,7 +14,7 @@ def all(request):
     return show(request,Question.objects.new(),'question-all')
 
 def popular(request):
-    return show(request,Question.objects.popular(),'question-id')
+    return show(request,Question.objects.popular(),'question-popular')
 
 
 # new questions view
