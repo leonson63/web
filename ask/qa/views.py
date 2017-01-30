@@ -22,12 +22,11 @@ def show(request, query, url_name):
     limit = 10 # hadrcoding!!!
     page = request.GET.get('page', 1) #hardcoding !!!
     paginator = Paginator(query, limit)
-    paginator.baseurl = reverse(url_name)
-    page = paginator.page(page) # Page
+#    paginator.baseurl = reverse(url_name)
+    questions = paginator.page(page) # Page
     return render(request, 'all.html', {
-        'questions': page.object_list,
-        'paginator': paginator,
-        'page': page,
+        'questions': questions,
+        'baseurl' : reverse(url_name),
 })
 
 def question(request, *args, **kwargs):

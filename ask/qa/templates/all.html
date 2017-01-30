@@ -1,12 +1,8 @@
 <nav><ul class="pagination">
 view all
-{% for p in paginator.page_range %}
-  {% if p.number == page.number %}
-    <li class="active">
-  {% else %}
+{% for q in questions %}
     <li>
-  {% endif %}
-  <a href="{{ paginator.baseurl }}{{ p.number }}">{{ p.title }}</a>
+  <a href="{{ baseurl }}?page={{ q.pk }}">{{ q.title }}</a>
   </li>
 {% endfor %}
 </ul></nav>
