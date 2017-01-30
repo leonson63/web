@@ -19,11 +19,18 @@ def popular(request):
 
 # new questions view
 def show(request, query, url_name):
+    if query.length()
     limit = 10 # hadrcoding!!!
     page = request.GET.get('page', 1) #hardcoding !!!
     paginator = Paginator(query, limit)
 #    paginator.baseurl = reverse(url_name)
-    questions = paginator.page(page) # Page
+    try:
+        questions = paginator.page(page)
+    except EmptyPage:
+        questions = paginator.page(paginator.num_pages)
+    return page
+
+#    questions = paginator.page(page) # Page
     return render(request, 'all.html', {
         'questions': questions,
         'baseurl' : reverse(url_name),
