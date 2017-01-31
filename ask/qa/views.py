@@ -34,9 +34,8 @@ def show(request, query, url_name):
         'questions': questions,
         'baseurl' : reverse(url_name),
 })
-from django.views.decorators.csrf import csrf_exempt
 
-@csrf_exempt
+
 def question(request, *args, **kwargs):
     id=kwargs['id']
     try:
@@ -56,7 +55,7 @@ def question(request, *args, **kwargs):
         'form':form,
     })
 # --------------------------------------
-@csrf_exempt
+
 def ask(request, *args, **kwargs):
     if request.method == "POST":
         form = AskForm(request.POST)
