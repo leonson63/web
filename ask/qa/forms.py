@@ -6,7 +6,8 @@ class AskForm(forms.Form):
     title = forms.CharField()
     text = forms.CharField(widget=forms.Textarea)
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
+        super.__init__(self)
         self.title=kwargs['title']
         self.text=kwargs['text']
 
