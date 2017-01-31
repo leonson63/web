@@ -15,7 +15,7 @@ class AskForm(forms.Form):
 
 class AnswerForm(forms.Form):
     text = forms.CharField(widget=forms.Textarea)
-    question = forms.CharField()
+    question = forms.IntegerField()
 
     def clean_question(self):
         try:
