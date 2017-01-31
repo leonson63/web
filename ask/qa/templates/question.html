@@ -5,3 +5,10 @@
         <li>{{ a.text }}</li>
     {% endfor %}
 </ul>
+Your answer:
+<form method="post">
+ {% csrf_token %}
+{{ form.text }}
+{{ form.question }}
+<button type="submit">Send</button>
+</form>

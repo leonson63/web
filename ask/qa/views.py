@@ -3,9 +3,10 @@ from django.http import Http404
 from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator
 from qa.models import Question, Answer
+from qa.forms import AskForm, AnswerForm
 
 # Create your views here.
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 
 def test(request, *args, **kwargs):
     return HttpResponse('OK', status=200)
@@ -35,12 +36,35 @@ def show(request, query, url_name):
 })
 
 def question(request, *args, **kwargs):
+    id=kwargs['id']
     try:
-        question = Question.objects.get(pk=kwargs['id'])
+        question = Question.objects.get(pk=id)
     except Question.DoesNotExist:
         raise Http404
-    answers=Answer.objects.filter(question__pk=kwargs['id'])
+    if request.method == "POST":
+        form = AnswerForm(request.POST)
+        ans=form.save()
+        return HttpResponseRedirect('/question/%d/' % id)
+
+    answers=Answer.objects.filter(question__pk=id)
+    form = AnswerForm()
     return render(request, 'question.html', {
         'question': question,
-        'answers': answers
+        'answers': answers,
+        'form':form,
     })
+# --------------------------------------
+
+def ask(request, *args, **kwargs):
+    if request.method == "POST":
+        form = AskForm(request.POST)
+        if form.is_valid():
+            question = form.save()
+            url = question.get_url()
+            return HttpResponseRedirect(url)
+    else:
+        form = AskForm()
+    return render(request, 'askform.html', {
+        'form': form
+    })
+

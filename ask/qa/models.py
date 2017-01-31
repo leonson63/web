@@ -21,6 +21,8 @@ class Question(models.Model):
     author = models.ForeignKey(User)
     likes = models.ManyToManyField(User, related_name = 'question_like')
 
+    def get_url(self):
+        return '/question/'+str(pk)+'/'
 
 class Answer(models.Model):
     text = models.TextField()
