@@ -8,6 +8,7 @@ class AskForm(forms.Form):
 
     def save(self):
         q = Question(**self.cleaned_data)
+        q.author_id=0
         q.save()
         return q
 
@@ -25,5 +26,6 @@ class AnswerForm(forms.Form):
 
     def save(self):
         a = Answer(**self.cleaned_data)
+        a.author_id=0
         a.save()
         return a
