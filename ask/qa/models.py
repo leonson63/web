@@ -22,7 +22,7 @@ class Question(models.Model):
     likes = models.ManyToManyField(User, related_name = 'question_like')
 
     def get_url(self):
-        return '/question/'+str(pk)+'/'
+        return '/question/'+str(self.pk)+'/'
 
 class Answer(models.Model):
     text = models.TextField()

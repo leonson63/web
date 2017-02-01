@@ -37,15 +37,16 @@ def show(request, query, url_name):
 
 
 def question(request, *args, **kwargs):
-    id=kwargs['id']
+    id=int(kwargs['id'])
     try:
         question = Question.objects.get(pk=id)
     except Question.DoesNotExist:
         raise Http404
     if request.method == "POST":
         form = AnswerForm(request.POST)
-        ans=form.save()
-        return HttpResponseRedirect('/question/%d/' % id)
+        if form.is_valid():
+            ans=form.save()
+            return HttpResponseRedirect('/question/%d/' % id)
 
     answers=Answer.objects.filter(question__pk=id)
     form = AnswerForm()
