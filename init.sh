@@ -13,4 +13,4 @@ sudo /etc/init.d/mysql restart
 cd ~/web/ask
 gunicorn -c "../gunicorn.conf" ask.wsgi --daemon
 
-sql.sh
+. sql.sh
