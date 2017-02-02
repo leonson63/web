@@ -2,8 +2,9 @@ from django.shortcuts import render
 from django.http import Http404
 from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator
+from django.contrib.auth.models import User
 from qa.models import Question, Answer
-from qa.forms import AskForm, AnswerForm
+from qa.forms import AskForm, AnswerForm, SignUpForm, LoginForm
 
 # Create your views here.
 from django.http import HttpResponse, HttpResponseRedirect
@@ -55,7 +56,6 @@ def question(request, *args, **kwargs):
         'answers': answers,
         'form':form,
     })
-# --------------------------------------
 
 def ask(request, *args, **kwargs):
     if request.method == "POST":
@@ -69,4 +69,31 @@ def ask(request, *args, **kwargs):
     return render(request, 'askform.html', {
         'form': form
     })
+# --------------------------------------
+from django.contrib.auth import authenticate, user
 
+def signup(request, *args, **kwargs):
+    if request.method == "POST":
+        form=SignUpForm(request.POST)
+        if form.is_valid():
+            user=User.objects.create_user(**form.cleaned_data)
+            login(request, user)
+            return HttpResponseRedirect('/')
+    form=SignUpForm()
+    return render(request, 'loginform.html', {
+        'form': form,
+    })
+
+
+def login(request, *args, **kwargs):
+    if request.method != "POST":
+        form=LoginForm(request.POST)
+        if form.is_valid():
+            user = authenticate(**form.cleaned_data)
+            if user:
+                login(request,user)
+                return HttpResponseRedirect('/')
+    form=LoginForm()
+    return render(request, 'loginform.html', {
+        'form': form,
+    })

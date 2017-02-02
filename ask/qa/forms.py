@@ -29,3 +29,13 @@ class AnswerForm(forms.Form):
         a.author_id=0
         a.save()
         return a
+
+class SignUpForm(forms.Form):
+    username = forms.CharField()
+    email = forms.CharField()
+    password = forms.CharField()
+
+class LoginForm(forms.Form):
+    username = forms.CharField()
+    email = forms.CharField()
+    password = forms.CharField()
