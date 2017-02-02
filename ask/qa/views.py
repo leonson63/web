@@ -78,6 +78,7 @@ def signup(request, *args, **kwargs):
         if form.is_valid():
             user=User.objects.create_user(**form.cleaned_data)
             login(request, user)
+            request.session.create()
             return HttpResponseRedirect('/')
     form=SignUpForm()
     return render(request, 'loginform.html', {
