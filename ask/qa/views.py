@@ -79,6 +79,7 @@ def signup(request, *args, **kwargs):
         form=SignUpForm(request.POST)
         if form.is_valid():
             user=User.objects.create_user(**form.cleaned_data)
+            user.backend=None
             login(request, user)
 #            request.session.create()
             return HttpResponseRedirect('/')
