@@ -46,6 +46,7 @@ def question(request, *args, **kwargs):
     if request.method == "POST":
         form = AnswerForm(request.POST)
         if form.is_valid():
+            form.cleaned_data['author']=request.user
             ans=form.save()
             return HttpResponseRedirect('/question/%d/' % id)
 
@@ -61,6 +62,7 @@ def ask(request, *args, **kwargs):
     if request.method == "POST":
         form = AskForm(request.POST)
         if form.is_valid():
+            form.cleaned_data['author']=request.user
             question = form.save()
             url = question.get_url()
             return HttpResponseRedirect(url)
@@ -93,6 +95,7 @@ def login(request, *args, **kwargs):
             user = authenticate(**form.cleaned_data)
             if user:
                 login(request,user)
+                request.session.create()
                 return HttpResponseRedirect('/')
     form=LoginForm()
     return render(request, 'loginform.html', {
