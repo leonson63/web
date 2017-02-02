@@ -103,4 +103,5 @@ def login(request, *args, **kwargs):
     form=LoginForm()
     return render(request, 'loginform.html', {
         'form': form,
+        'msg': msg,
     })
