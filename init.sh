@@ -4,13 +4,17 @@
 # add nginx config
 sudo unlink /etc/nginx/sites-enabled/default
 sudo ln -sf /home/box/web/etc/nginx.conf /etc/nginx/conf.d/add.conf
+sudo ln -sf /home/box/web/gunicorn.conf /etc/gunicorn.d/cfg
 
 # run nginx
 sudo /etc/init.d/nginx restart
 sudo /etc/init.d/mysql restart
 
 # run gunicorn
-cd ~/web/ask
-gunicorn -c "../gunicorn.conf" ask.wsgi --daemon
+sudo /etc/init.d/gunicorn restart
+#gunicorn -c "../gunicorn.conf" ask.wsgi --daemon
 
 . sql.sh
+
+cd ~/web/ask
+
