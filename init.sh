@@ -11,7 +11,7 @@ sudo /etc/init.d/nginx restart
 sudo /etc/init.d/mysql restart
 
 # run gunicorn
-sudo /etc/init.d/gunicorn restart
+sudo /etc/init.d/gunicorn restart cfg
 #gunicorn -c "../gunicorn.conf" ask.wsgi --daemon
 
 . sql.sh
