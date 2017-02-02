@@ -49,7 +49,7 @@ def question(request, *args, **kwargs):
             form.cleaned_data['author']=request.user
             ans=form.save()
             return HttpResponseRedirect('/question/%d/' % id)
-
+        
     answers=Answer.objects.filter(question__pk=id)
     form = AnswerForm()
     return render(request, 'question.html', {
@@ -89,6 +89,7 @@ def signup(request, *args, **kwargs):
 
 
 def login(request, *args, **kwargs):
+    msg=''
     if request.method != "POST":
         form=LoginForm(request.POST)
         if form.is_valid():
@@ -97,6 +98,8 @@ def login(request, *args, **kwargs):
                 login(request,user)
                 request.session.create()
                 return HttpResponseRedirect('/')
+            msg=form.cleaned_data['username']+'/'+form.cleaned_data['password']
+        msg+=' invalid form'
     form=LoginForm()
     return render(request, 'loginform.html', {
         'form': form,
