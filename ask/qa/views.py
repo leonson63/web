@@ -88,7 +88,7 @@ def signup(request, *args, **kwargs):
     })
 
 
-def login(request, *args, **kwargs):
+def tologin(request, *args, **kwargs):
     msg='Login form <br>'
     if request.method == "POST":
         form=LoginForm(request.POST)
