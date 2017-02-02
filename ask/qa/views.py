@@ -89,8 +89,8 @@ def signup(request, *args, **kwargs):
 
 
 def login(request, *args, **kwargs):
-    msg=''
-    if request.method != "POST":
+    msg='Login form <br>'
+    if request.method == "POST":
         form=LoginForm(request.POST)
         if form.is_valid():
             user = authenticate(form.cleaned_data['username'],form.cleaned_data['password'])
@@ -98,7 +98,7 @@ def login(request, *args, **kwargs):
                 login(request,user)
                 request.session.create()
                 return HttpResponseRedirect('/')
-            msg=form.cleaned_data['username']+'/'+form.cleaned_data['password']
+            msg+=form.cleaned_data['username']+'/'+form.cleaned_data['password']
         msg+=' invalid form'
     form=LoginForm()
     return render(request, 'loginform.html', {
