@@ -70,7 +70,7 @@ def ask(request, *args, **kwargs):
         'form': form
     })
 # --------------------------------------
-from django.contrib.auth import authenticate, user
+from django.contrib.auth import authenticate, login
 
 def signup(request, *args, **kwargs):
     if request.method == "POST":
