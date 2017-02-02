@@ -81,7 +81,7 @@ def signup(request, *args, **kwargs):
             request.session.create()
             return HttpResponseRedirect('/')
     form=SignUpForm()
-    return render(request, 'loginform.html', {
+    return render(request, 'signupform.html', {
         'form': form,
     })
 
