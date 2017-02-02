@@ -93,7 +93,10 @@ def login(request, *args, **kwargs):
     if request.method == "POST":
         form=LoginForm(request.POST)
         if form.is_valid():
-            user = authenticate(form.cleaned_data['username'],form.cleaned_data['password'])
+            user = authenticate(
+                    username=form.cleaned_data['username'],
+                    password=form.cleaned_data['password']
+            )
             if user:
                 login(request,user)
                 request.session.create()
