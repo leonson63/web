@@ -79,8 +79,12 @@ def signup(request, *args, **kwargs):
         form=SignUpForm(request.POST)
         if form.is_valid():
             user=User.objects.create_user(**form.cleaned_data)
-            login(request, user)
-            request.session.create()
+#            login(request, user)
+#            request.session.create()
+            user = authenticate(
+                    username=form.cleaned_data['username'],
+                    password=form.cleaned_data['password']
+            )
             return HttpResponseRedirect('/')
     form=SignUpForm()
     return render(request, 'signupform.html', {
@@ -99,7 +103,7 @@ def tologin(request, *args, **kwargs):
             )
             if user:
                 login(request,user)
-                request.session.create()
+#                request.session.create()
                 return HttpResponseRedirect('/')
             msg+=form.cleaned_data['username']+'/'+form.cleaned_data['password']
         msg+=' invalid form'
