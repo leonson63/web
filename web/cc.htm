@@ -1,0 +1,481 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0035)http://10.128.157.230/~alp/payments -->
+<HTML><HEAD><TITLE>Расчет сумм платежей по кредиту</TITLE>
+<META http-equiv=Content-Type content="text/html; charset=windows-1251">
+<META content="MSHTML 6.00.2800.1106" name=GENERATOR></HEAD>
+<BODY>
+<CENTER>
+<H2>Кредитный калькулятор </H2>Версия 1.7b. Описание можно посмотреть <A 
+href="paym_help.htm" target=help>здесь </A></CENTER>
+<FORM name=main>
+<TABLE id=parameters border=0>
+  <COLGROUP align=left>
+  <COLGROUP align=right char=".">
+  <TBODY bgColor=#f0f0f0>
+  <TR>
+    <TH>Сумма 
+    <TD id=s0 onclick=ed() width="25%">
+    <TD width="5%" bgColor=#ffffff rowSpan=6>
+    <TD bgColor=#ffffff rowSpan=6><B>Перенос празничных и выходных 
+      дней:</B><BR><INPUT id=adj_n title="Не переносить даты" type=radio 
+      name=adj> * (не переносить)<BR><INPUT id=adj_f title="Переносить вперед" 
+      type=radio name=adj> *... (вперед)<BR><INPUT id=adj_b 
+      title="Переносить назад" type=radio name=adj> ...* (назад)<BR><INPUT 
+      id=adj_a title="К ближайшему рабочему" type=radio name=adj> ...*... (к 
+      ближайщему)<BR><INPUT id=adj_m title="В пределах месяца" type=radio 
+      CHECKED name=adj> |...*...| (в пределах месяца) </TD>
+  <TR>
+    <TH>Процентная ставка </TH>
+    <TD id=s_proc onclick=ed()></TD>
+  <TR>
+    <TH>Дата выдачи </TH>
+    <TD id=d1 onclick=ed()></TD>
+  <TR>
+    <TH>Дни гашения </TH>
+    <TD id=_days onclick=ed()>31 </TD>
+  <TR>
+    <TH>Последняя дата гашения </TH>
+    <TD id=d2 onclick=ed()></TD>
+  <TR>
+    <TH>или разовая сумма </TH>
+    <TD id=s_one onclick=ed()></TD></TR></TBODY></TABLE><INPUT id=iCorrect 
+type=checkbox CHECKED> автокорректировка последней выплаты <BR><INPUT onclick=rebuild_graph() type=button value="! Рассчитать даты"> <INPUT onclick=calculate() type=button value="! Рассчитать суммы"><BR>
+<TABLE id=main_table rules=all width="100%" border=1>
+  <THEAD align=middle>
+  <TR>
+    <TH width="5%">№</TH>
+    <TH width="15%">Дата платежа</TH>
+    <TH width="20%">Сумма оплаты основного долга</TH>
+    <TH width="20%">Сумма оплаты процентов</TH>
+    <TH width="20%">Общая сумма платежа</TH>
+    <TH width="20%">Остаток на следующую дату</TH></TR></THEAD>
+  <TBODY id=main_rows align=right bgColor=#f0f0f0></TBODY>
+  <TFOOT id=footer align=right bgColor=#d0d0d0>
+  <TR>
+    <TD onclick=add_row_befor() align=middle>+ </TD>
+    <TD>Итого: </TD>
+    <TD id=smt></TD>
+    <TD id=spt></TD>
+    <TD id=stt></TD>
+    <TD id=sat></TD></TR></TFOOT></TABLE><SMALL>* Для добавления строки перед 
+текущей щелкните на поле номера<BR>Для удаления строки сотрите в ней значение 
+даты<BR></SMALL><INPUT value=Коментарий> </FORM>
+<SCRIPT language=JScript>
+<!--
+var Holidays="01.01 07.01 08.03 01.05 02.05 09.05 12.06 07.11 12.12" ;
+
+var H24=24*3600000;
+var UD="#ffd0d0";			//user entered dates
+var UC="#00bfff";			//user entered value
+var SC="#f0f0f0";			//standart value
+var Ann_Sum=0;				//annuitet sum for iterations
+
+
+function set_workdays()
+  {
+  main.iMonth.disabled = !main.iWorkdays.checked;
+  }
+
+function NormValueOf(obj)
+    {
+    var s=obj.value.replace(/[\.,]/g,".");
+    var tmp=Math.round(parseFloat(s)*100)/100;
+    var id;
+
+    if(s!="" && isNaN(tmp)==true)
+	{
+	alert("Введите сумму правильно!");
+	obj.value="0"+s;
+	}
+    else
+	{
+	var c=obj.parentNode;
+        if(c.id.substr(2,1)=="i") 
+	   {
+	   c.bgColor=(s=="")?SC:UC;
+	   if(c.parentNode.all.item("smi").bgColor==UC &&
+	      c.parentNode.all.item("sti").bgColor==UC)
+	          c.parentNode.all.item(c.id=="sti"?"smi":"sti").bgColor=SC;
+	   }
+	if(s!="") wr_sum(obj,tmp);
+	}
+    return(!isNaN(tmp));
+    }
+function NormDateOf(obj)
+    {
+    var p1,p2,d,m,y,dd;
+    var tmp=obj.value.replace(/[\/\-\.,]/g,"/");
+    p1=tmp.indexOf("/");
+    if(p1<0) {tmp=tmp.substr(0,2)+"/"+tmp.substr(2,2)+"/"+tmp.substr(4,4); p1=2}
+    p2=tmp.indexOf("/",p1+1);
+    d=parseFloat(tmp.substring(0,p1));
+    m=parseFloat(tmp.substring(p1+1,p2));
+    y=parseFloat(tmp.substring(p2+1,10));
+    if(y<70) y=y+2000;
+	else if(y<100) y+=1900;
+
+    dd=new Date(y,m-1,d);
+    if(isNaN(dd))
+	obj.value="";
+    else
+	{
+        d=dd.getDate();
+        m=dd.getMonth()+1;
+	y=dd.getYear();
+	if(y<1000) y+=1900;
+        obj.value=(d<10? "0":"")+d+"."+(m<10? "0":"")+m+'.'+y;
+	}
+    return !isNaN(dd);
+    }
+
+function rd_sum(f)
+  {
+  if(isNaN(f.innerText.replace(/,/g,"."))) return 0;
+  return parseFloat(f.innerText.replace(/,/g,"."));
+  }
+function wr_sum(obj,sum)
+    {
+    var ss=Math.round(Math.abs(sum)*100).toString();
+    if(ss.length<3) ss="0"+ss;
+    if(ss.length<3) ss="0"+ss;
+    if(sum<0) ss="-"+ss;
+    var l=ss.length;
+    
+    obj.innerText=ss.substr(0,l-2)+","+ss.substr(l-2,2);
+    }
+function add_row(n)
+    {
+    var r=document.all.main_rows.insertRow(n);
+/*    var c=r.insertCell();
+
+    c.innerHTML="<input type=button value=+ "+ 
+        "title=\"Вставить строку перед текущей\" "+
+	"onclick=add_row(this.parentNode.parentNode.sectionRowIndex)>";
+    c=r.insertCell();
+    c.innerHTML="<input type=button value=X "+
+	"title=\"Удалить строку\" "+
+	"onclick=del_row(this.parentNode.parentNode.sectionRowIndex)>";
+*/
+    c=r.insertCell(); c.onclick=add_row_befor; 
+    c=r.insertCell(); c.onclick=ed; c.id="di";
+    c=r.insertCell(); c.onclick=ed; c.id="smi";
+    c=r.insertCell(); c.onclick=ed; c.id="spi";
+    c=r.insertCell(); c.onclick=ed; c.id="sti";
+    c=r.insertCell(); c.onclick=ed; c.id="sai";
+    renum();
+    return r;
+    }
+function add_row_befor()
+  {
+  var f=event.srcElement;
+  var i=parseFloat("0"+f.innerText)-1;
+  add_row(i).all.item("di").click();
+  }
+function del_row(n)
+    {
+    document.all.main_rows.deleteRow(n);
+    renum();
+    }
+
+function renum()
+   {
+   var r=document.all.main_rows.rows;
+   var i;
+   for(i=0;i<r.length;i++) r[i].cells[0].innerHTML=(i+1).toString();
+   }
+
+function calculate() 
+  {
+  var res=0;  
+  Ann_Sum=rd_sum(document.all.item("s0"));
+
+  var res_pre=Ann_Sum;
+  var ann_pre=0;
+  var ax;
+  var count=500; // max iteration count
+
+  var last_row;
+
+  while(Math.abs(Ann_Sum-ann_pre)>0.001 /*Math.abs(res_pre)>=0.001*/ )
+    {
+    res=calc1(); if(Math.round(res*100)==0) break;
+    if(! --count) break;
+    ax=Ann_Sum;
+    Ann_Sum= (res>0)!=(res_pre>0)?(Ann_Sum+ann_pre)/2: 
+	(Math.abs(res)>Math.abs(res_pre)? 2*ann_pre-Ann_Sum: 2*Ann_Sum-ann_pre);
+//alert(ax+"->"+res);
+    ann_pre=ax;
+    res_pre=res;
+    }
+  if(!count) alert("Не удалось выполнить расчет!\nПопробуйте изменить параметры");
+  if(main.iCorrect.checked && main_rows.rows.length>0) //correct last_row
+    {
+    with(main_rows.rows[main_rows.rows.length-1].all)
+	{
+        wr_sum(item("smi"),rd_sum(item("smi"))+res);
+    	wr_sum(item("sti"),rd_sum(item("sti"))+res);
+	wr_sum(item("sai"),0);
+	}
+    with(document.all)
+	{
+	wr_sum(item("smt"),rd_sum(item("smt"))+res);
+	wr_sum(item("stt"),rd_sum(item("stt"))+res);
+	}
+    }
+  }
+
+
+function calc1()
+  {
+  var calc_proc=0,real_proc;
+  var obj=document.all;
+  var t_amount=rd_sum(obj.item("s0")), t_main=0, t_proc=0;
+
+  var td=obj.item("d1").innerText;
+  var D0=new Date(td.substr(6,4),parseInt(td.substr(3,2)-1),td.substr(0,2));
+  var Di=new Date(0,0,0,0,0,0);
+  var D1j=new Date(Di);		//the january,1 of the next year
+  var D1jn=new Date(Di);	//the january,1 of year past D1j
+  var D1jp=new Date(Di)
+
+  var r=document.all.item("main_rows").rows;
+  var p_days,last_ann=-1;
+  var y_days;
+
+  for(i=0;i<r.length;i++)
+    {
+    cur=r[i].all;
+    td=cur.item("di").innerText;
+
+
+    Di.setFullYear(td.substr(6,4),parseInt(td.substr(3,2)-1),td.substr(0,2));
+
+    D1j.setTime(Di);
+    D1j.setMonth(0,1);
+
+    D1jn.setTime(D1j);
+    D1jn.setFullYear(D1j.getFullYear()+1,0,1);
+
+    if(Di.getFullYear()==D0.getFullYear())
+	{
+	p_days=Math.round((Di-D0)/H24);
+	y_days=Math.round((D1jn-D1j)/H24);
+	calc_proc+=Math.round( 
+		t_amount*p_days*rd_sum(obj.item("s_proc"))/y_days
+			     )/100;
+	}
+    else
+	{
+	D1jp.setTime(D0);
+	D1jp.setMonth(0,1);
+
+	p_days=Math.round((D1j-D0)/H24);
+	y_days=Math.round((D1j-D1jp)/H24);
+	calc_proc+=Math.round( 
+		t_amount*p_days*rd_sum(obj.item("s_proc"))/y_days 
+			     )/100;
+	p_days=Math.round((Di-D1j)/H24);
+	y_days=Math.round((D1jn-D1j)/H24);
+	calc_proc+=Math.round( 
+		t_amount*p_days*rd_sum(obj.item("s_proc"))/y_days
+			     )/100;
+	
+	}
+
+    if(cur.item("spi").bgColor==UC)
+	{
+	real_proc=rd_sum(cur.item("spi"));
+	calc_proc-=real_proc;
+	}
+    else
+	{
+	wr_sum(cur.item("spi"), calc_proc);
+	real_proc=calc_proc;
+	calc_proc=0;
+	}
+
+    if(cur.item("smi").bgColor==UC)
+	wr_sum(cur.item("sti"),rd_sum(cur.item("smi"))+real_proc);
+    else
+      {
+      if(cur.item("sti").bgColor!=UC)
+	   wr_sum(cur.item("sti"),Ann_Sum), last_ann=i;
+      wr_sum(cur.item("smi"),rd_sum(cur.item("sti"))-real_proc);
+      }
+    t_amount -= rd_sum(cur.item("smi"));
+    wr_sum(cur.item("sai"),t_amount);
+    t_proc += real_proc;
+    t_main += Math.max(rd_sum(cur.item("smi")),0); //positive only
+    D0.setTime(Di);
+    }
+  obj=obj.item("footer").rows[0].all;
+  wr_sum(obj.item("sat"),t_amount);
+  wr_sum(obj.item("spt"),t_proc);
+  wr_sum(obj.item("smt"),t_main);
+  wr_sum(obj.item("stt"),t_main+t_proc);
+  obj.item("sat").innerText="["+obj.item("sat").innerText+"]";
+  return(last_ann>=0 ? t_amount:0);
+  }
+
+function rebuild_graph()
+  {
+  var i,f,d_,m_,r1,m;
+  var a=document.all;
+  var r=a.item("main_rows").rows;
+  var len=r.length;
+
+  var amount=rd_sum(a.item("s0"));
+  var td=a.item("d1").innerText;
+  var D=new Date(parseInt(td.substr(6,4)),parseInt(td.substr(3,2)-1),td.substr(0,2));
+  var nD=new Date();
+  td=a.item("d2").innerText;
+  var D2=new Date(parseInt(td.substr(6,4)),parseInt(td.substr(3,2)-1),td.substr(0,2));
+//alert(D2);
+  if(isNaN(D2))
+	{
+	D2.setTime(D); D2.setMilliseconds(H24*3650);
+	}
+  var days="#"+a.item("_days").innerText.replace(/[ \,\.\-\+]/g,"#")+"#";
+  var n=parseInt(days.replace(/^#*/,""));
+  if(isNaN(n) || n==0 || n>31) days="#31#";
+
+  D.setMilliseconds(H24);
+  var x=0;
+  var xD=new Date(0,0,0,0,0,0);
+  var wD=new Date(0,0,0,0,0,0);
+  var usenext=false;
+
+  while(D.getTime()<=D2.getTime() && amount>0)
+    {
+
+    nD.setTime(D); nD.setMilliseconds(H24);
+    i=D.getDate();
+    do	{
+	if(days.indexOf("#"+i.toString()+"#")>=0 || 
+				D.getTime()==D2.getTime())
+	  {
+	  if(! main.adj_n.checked)
+	    {
+	    for(f=0;f>-30;f=(f>0?0:1)-f)
+	     {
+	     wD.setTime(D); wD.setMilliseconds(f*H24);
+	     if( ((f>=0 && !main.adj_b.checked) ||
+		 (f<=0 && !main.adj_f.checked) )
+		 &&
+		!( is_holy(wD,0) ||
+		wD.getDay()==0 && !is_holy(wD,-3) ||
+		wD.getDay()==6 && !is_holy(wD,+3) || 
+		wD.getDay()==1 && is_holy(wD,+1) ||
+		wD.getDay()==5 && is_holy(wD,-1)
+      	      )) 
+		{
+		if(!main.adj_m.checked || wD.getMonth()==D.getMonth()) break;
+		}
+	     }
+	    }	
+	  else wD.setTime(D);
+
+	  while(x<r.length) // buldoze days
+	    {
+	    td=r[x].all.item("di").innerText;
+	    xD.setFullYear(parseFloat(td.substr(6,4)),parseFloat(td.substr(3,2)-1),parseFloat(td.substr(0,2)));
+
+	    if(xD<wD) a.item("main_rows").deleteRow(x);
+	    else break;
+	    }
+
+          if(wD<xD || x>=r.length) 
+	    {
+	    add_row(x<r.length? x : -1);
+            d_=wD.getDate();
+            m_=wD.getMonth()+1;
+	    y=wD.getYear(); if(y<1000) y+=1900;
+	    r[x].all.item("di").innerText=
+		(d_<10? "0":"")+d_+"."+(m_<10? "0":"")+m_+'.'+y;
+	    if(wD.getTime()!=D.getTime()) 
+		r[x].cells("di").bgColor=UD;
+	    }
+	  usenext=false;
+	  m=rd_sum(a.item("s_one"));
+	  if(m>0.01)
+	     {
+	     if(m>amount) m=amount;
+	     wr_sum(r[x].all.item("smi"),m);
+	     r[x].all.item("smi").bgColor=UC;
+	     amount -=m;
+	     }
+	  x++;
+	  }
+	}
+    while(++i !=nD.getDate() && i<32 && D.getTime()<D2.getTime());
+
+    D.setMilliseconds(H24);
+    }
+
+  while(x<r.length) del_row(x);
+  renum();
+  }
+
+function is_holy(d,lookup)
+   {
+   var dd=new Date(d);
+   dd.setMilliseconds(lookup*H24);
+   var d_=dd.getDate();
+   var m_=dd.getMonth()+1;
+//alert((d_>9?"":"0")+d_+"."+ (m_>9?"":"0")+m_);
+   return( Holidays.indexOf((d_>9?"":"0")+d_+"."+ (m_>9?"":"0")+m_)>=0);
+   }
+//--------------------------------------
+function ed()
+  {
+  var f=event.srcElement;
+  var a=document.all;
+
+  if(f.id=="s_one" && a.item("d2").innerHTML!="" ||
+	f.id=="d2" && a.item("s_one").innerHTML!="" ||
+	f.id=="sai"
+    )
+		return;
+
+  if(f.tagName=="TD" && f.innerHTML.substr(0,1)!="<")
+    {
+    f.innerHTML="<input type=text size="+(f.id.substr(0,1)=="d"?10:14)+
+	" value=\""+f.innerHTML+"\" onblur=end_ed() onkeypress=catch_enter()>";
+    if(f.children.item(0)!=null) {
+	f.children.item(0).select();
+   	}
+    }
+//  else alert(f.childNodes.tagName);
+  }
+function end_ed()
+  {
+  var f=event.srcElement;
+  var c=f.parentNode;
+
+  switch(c.id.substr(0,1)){
+	case "s":NormValueOf(f); break;
+	case "d":NormDateOf(f); break;
+	}
+  if(f.value=="" && f.parentNode.id=="di")
+	del_row(f.parentNode.parentNode.sectionRowIndex);
+  else
+	c.innerHTML=f.value;
+  }
+
+function catch_enter()
+  {
+  var c;
+  var f=event.srcElement;
+
+  if(event.keyCode==13)
+    {
+    c=f.parentNode;
+    try { c.parentNode.nextSibling.cells(c.cellIndex).click(); }
+    catch(e){f.blur();} 
+    }
+  }
+
+
+-->
+</SCRIPT>
+</BODY></HTML>
